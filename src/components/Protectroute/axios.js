@@ -2,7 +2,8 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
     // baseURL: "https://1z0th4tl-5000.inc1.devtunnels.ms/api", 
-    baseURL: "http://localhost:5000/api",
+    // baseURL: "http://localhost:5000/api",
+    baseURL: "https://api.fastpaysave.com/api",
     timeout: 15000,
 });
 

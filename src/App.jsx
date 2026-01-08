@@ -4,6 +4,10 @@ import Sidebar from "./components/Layout/Sidebar";
 import Topbar from "./components/Layout/Topbar";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
+
+import ContactUs from "./pages/ContactUs"; // Add this import
+
+
 import FastagRecharge from "./pages/FastagRecharge";
 import Settings from "./pages/Settings";
 import Login from "./pages/login";
@@ -37,7 +41,7 @@ export default function App() {
               <Route
                 path="/"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin"]}>
                     <Dashboard />
                   </ProtectedRoute>
                 }
@@ -46,8 +50,18 @@ export default function App() {
               <Route
                 path="/users"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin"]}>
                     <Users />
+                  </ProtectedRoute>
+                }
+              />
+
+
+              <Route
+                path="/contact"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <ContactUs />
                   </ProtectedRoute>
                 }
               />
@@ -55,7 +69,7 @@ export default function App() {
               <Route
                 path="/fastag"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin"]}>
                     <FastagRecharge />
                   </ProtectedRoute>
                 }
@@ -64,7 +78,7 @@ export default function App() {
               <Route
                 path="/settings"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin"]}>
                     <Settings />
                   </ProtectedRoute>
                 }
@@ -72,7 +86,7 @@ export default function App() {
               <Route
                 path="/wallet"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin"]}>
                     <WalletReport />
                   </ProtectedRoute>
                 }

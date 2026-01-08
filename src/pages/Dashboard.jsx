@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaCheckCircle, FaRupeeSign, FaUsers, FaCarSide } from "react-icons/fa";
+import { FaCheckCircle, FaRupeeSign, FaUsers, FaCarSide, FaClock, FaExclamationTriangle, FaHistory } from "react-icons/fa";
 import StatCard from "../components/common/StatCard";
 import axiosInstance from "../components/Protectroute/axios.js";
 import Loader from "./loader";
@@ -36,6 +36,10 @@ export default function Dashboard() {
     );
   }
 
+  // Calculate total today's transactions
+  const totalTodayTransactions = data.today.pending + data.today.success + data.today.failed;
+  const totalOverallTransactions = data.overall.pending + data.overall.success + data.overall.failed;
+
   return (
     <div className="space-y-5">
       <div>
@@ -43,7 +47,7 @@ export default function Dashboard() {
           Dashboard Overview
         </h1>
         <p className="text-sm text-slate-400 mt-1">
-          Quick snapshot of users, FASTag recharges, and today's performance.
+          Quick snapshot of users, FASTag recharges, and transaction performance.
         </p>
       </div>
 
@@ -52,78 +56,170 @@ export default function Dashboard() {
         <StatCard
           label="Total Users"
           value={data.totalUsers}
-          subtitle="+ Today"
-          icon={<FaUsers />}
+          subtitle="Registered Users"
+          icon={<FaUsers className="text-indigo-400" />}
         />
 
         <StatCard
           label="Total FASTag Recharges"
           value={data.totalFastagRecharges}
-          subtitle="All Time"
-          icon={<FaCarSide />}
+          subtitle="All Transactions"
+          icon={<FaCarSide className="text-emerald-400" />}
+        />
+
+        <StatCard
+          label="Total E-Chalan"
+          value={data.totalEchalan}
+          subtitle="E-Chalan Count"
+          icon={<FaCarSide className="text-amber-400" />}
         />
 
         <StatCard
           label="Recharge Volume"
-          value={`₹ ${data.rechargeVolume.toLocaleString()}`}
-          subtitle="Last 30 Days"
-          icon={<FaRupeeSign />}
-        />
-
-        <StatCard
-          label="Success Rate"
-          value={`${data.successRate}%`}
-          subtitle={
-            <span className="flex items-center gap-1">
-              <FaCheckCircle /> Live
-            </span>
-          }
-          icon={<FaCheckCircle />}
+          value={`₹${data.rechargeVolume}`}
+          subtitle="Total Amount"
+          icon={<FaRupeeSign className="text-rose-400" />}
         />
       </div>
 
-      {/* TODAY SUMMARY */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 rounded-2xl bg-slate-950/60 border border-slate-800 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-100">
-              Today's Recharge Summary
-            </h2>
-            <span className="text-xs text-slate-400">
-              Last updated: few seconds ago
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <div className="text-slate-400">Pending</div>
-              <div className="mt-1 text-lg font-semibold text-amber-300">
-                {data.today.pending}
+      {/* SECOND ROW CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-slate-400">Success Rate</div>
+              <div className="mt-1 text-2xl font-bold text-emerald-400">
+                {data.successRate}%
               </div>
             </div>
+            <FaCheckCircle className="text-2xl text-emerald-400" />
+          </div>
+        </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <div className="text-slate-400">Success</div>
-              <div className="mt-1 text-lg font-semibold text-emerald-400">
+        {/* Today's Stats Summary Cards */}
+        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-slate-400">Today's Success</div>
+              <div className="mt-1 text-2xl font-bold text-emerald-400">
                 {data.today.success}
               </div>
             </div>
+            <FaCheckCircle className="text-xl text-emerald-400" />
+          </div>
+          <div className="text-xs text-slate-500 mt-1">Transactions</div>
+        </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <div className="text-slate-400">Failed</div>
-              <div className="mt-1 text-lg font-semibold text-rose-400">
+        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-slate-400">Today's Pending</div>
+              <div className="mt-1 text-2xl font-bold text-amber-300">
+                {data.today.pending}
+              </div>
+            </div>
+            <FaClock className="text-xl text-amber-300" />
+          </div>
+          <div className="text-xs text-slate-500 mt-1">Transactions</div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-slate-400">Today's Failed</div>
+              <div className="mt-1 text-2xl font-bold text-rose-400">
                 {data.today.failed}
               </div>
             </div>
+            <FaExclamationTriangle className="text-xl text-rose-400" />
+          </div>
+          <div className="text-xs text-slate-500 mt-1">Transactions</div>
+        </div>
+      </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <div className="text-slate-400">Refund Initiated</div>
-              <div className="mt-1 text-lg font-semibold text-sky-400">
-                {data.today.refund}
+      {/* TODAY VS OVERALL SUMMARY */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* TODAY'S SUMMARY */}
+        <div className="rounded-2xl bg-slate-950/60 border border-slate-800 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+              <FaClock className="text-amber-300" />
+              Today's Summary
+            </h2>
+            <span className="text-xs text-slate-400">
+              {totalTodayTransactions} total transactions
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Pending</span>
+              <span className="text-lg font-semibold text-amber-300">
+                {data.today.pending}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Success</span>
+              <span className="text-lg font-semibold text-emerald-400">
+                {data.today.success}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Failed</span>
+              <span className="text-lg font-semibold text-rose-400">
+                {data.today.failed}
+              </span>
+            </div>
+            <div className="pt-2 border-t border-slate-800">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-300 font-medium">Total Today</span>
+                <span className="text-lg font-bold text-slate-100">
+                  {totalTodayTransactions}
+                </span>
               </div>
             </div>
+          </div>
+        </div>
 
+        {/* OVERALL SUMMARY */}
+        <div className="rounded-2xl bg-slate-950/60 border border-slate-800 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+              <FaHistory className="text-indigo-400" />
+              Overall Summary
+            </h2>
+            <span className="text-xs text-slate-400">
+              {totalOverallTransactions} total
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Pending</span>
+              <span className="text-lg font-semibold text-amber-300">
+                {data.overall.pending}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Success</span>
+              <span className="text-lg font-semibold text-emerald-400">
+                {data.overall.success}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Failed</span>
+              <span className="text-lg font-semibold text-rose-400">
+                {data.overall.failed}
+              </span>
+            </div>
+            <div className="pt-2 border-t border-slate-800">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-300 font-medium">Total Overall</span>
+                <span className="text-lg font-bold text-slate-100">
+                  {totalOverallTransactions}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -133,22 +229,36 @@ export default function Dashboard() {
             Quick Actions
           </h2>
 
-          <div className="space-y-2 text-sm flex justify-between flex-col">
+          <div className="space-y-2 text-sm flex flex-col">
             <Link
               to="/users"
-              className="w-full px-3 py-2 rounded-xl bg-indigo-600 text-sm font-medium hover:bg-indigo-500 transition"
+              className="w-full px-3 py-2 rounded-xl bg-indigo-600 text-sm font-medium hover:bg-indigo-500 transition text-center"
             >
               User List
             </Link>
 
-
-            <Link to="/fastag" className="w-full px-3 py-2 rounded-xl bg-slate-900 text-slate-100 border border-slate-700 hover:bg-slate-800 transition">
+            <Link 
+              to="/fastag" 
+              className="w-full px-3 py-2 rounded-xl bg-slate-900 text-slate-100 border border-slate-700 hover:bg-slate-800 transition text-center"
+            >
               Start FASTag Recharge
             </Link>
 
-            <Link to="/wallet" className="w-full px-3 py-2 rounded-xl bg-slate-900 text-slate-100 border border-slate-700 hover:bg-slate-800 transition">
-              View Today's Reports
+            <Link 
+              to="/wallet" 
+              className="w-full px-3 py-2 rounded-xl bg-slate-900 text-slate-100 border border-slate-700 hover:bg-slate-800 transition text-center"
+            >
+              View Reports
             </Link>
+          </div>
+
+          {/* STATS INFO */}
+          <div className="mt-4 pt-4 border-t border-slate-800">
+            <div className="text-xs text-slate-500">
+              <p>• Success Rate: Based on overall transactions</p>
+              <p>• Recharge Volume: Total ₹ amount processed</p>
+              <p>• E-Chalan: Total e-chalan entries</p>
+            </div>
           </div>
         </div>
       </div>

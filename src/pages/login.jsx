@@ -56,7 +56,23 @@ export default function Login() {
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
 
+
+                if (res.data.user.role !== "admin") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Unauthorized",
+                        text: "You are not allowed to access admin dashboard",
+                    });
+
+                    // optional: token clear karna ho to
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+
+                    return;
+                }
+
                 navigate("/");
+
             } else {
                 Swal.fire("Failed", res.data.message, "error");
             }

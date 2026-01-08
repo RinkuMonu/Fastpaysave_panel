@@ -1,13 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaTachometerAlt, FaUsers, FaCar, FaCog, FaWallet } from "react-icons/fa";
+import { FaTachometerAlt, FaUsers, FaCar, FaCog, FaWallet, FaEnvelope } from "react-icons/fa";
 
 const menuItems = [
   { key: "dashboard", label: "Dashboard", icon: <FaTachometerAlt />, path: "/" },
-  { key: "wallet", label: "Wallet", icon: <FaWallet />, path: "/wallet" },
+  { key: "report", label: "Report", icon: <FaWallet />, path: "/wallet" },
   { key: "users", label: "Users", icon: <FaUsers />, path: "/users" },
+  { key: "contact", label: "Contact Us", icon: <FaEnvelope />, path: "/contact" }, // Add this line
   { key: "fastag", label: "FASTag Recharge", icon: <FaCar />, path: "/fastag" },
-  { key: "settings", label: "Settings", icon: <FaCog />, path: "/settings" },
+  // { key: "settings", label: "Settings", icon: <FaCog />, path: "/settings" },
 ];
 
 export default function Sidebar({ active }) {

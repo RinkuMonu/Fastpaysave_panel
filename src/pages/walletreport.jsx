@@ -58,7 +58,7 @@ export default function WalletReport() {
 
             <div>
                 <h1 className="text-xl md:text-2xl font-semibold text-slate-50">
-                    Wallet Top-Up Report
+                Top-Up Report
                 </h1>
                 <p className="text-sm text-slate-400 mt-1">
                     Track wallet credit & top-up transactions.

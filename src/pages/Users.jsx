@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import axiosInstance from "../components/Protectroute/axios.js";
@@ -22,9 +23,10 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const res = await axiosInstance.get("/auth/all-users");
+      const res = await axiosInstance.get("/auth");
       if (res.data.success) {
-        setUsers(res.data.data);
+        // FIX: API returns res.data.users, not res.data.data
+        setUsers(res.data.users || []);
       }
     } catch (err) {
       Swal.fire("Error", "Failed to fetch users", "error");
@@ -41,53 +43,53 @@ export default function Users() {
   const handleEdit = (user) => {
     setSelectedUser(user);
     setForm({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      mobile: user.mobile,
-      email: user.email,
-      role: user.role,
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      mobile: user.mobile || "",
+      email: user.email || "",
+      role: user.role || "user",
       profileImage: user.profileImage || "",
     });
   };
 
-  // Submit Create/Update
+  // Submit Update
   const handleSubmit = async (e) => {
-    setLoadingEdit(true)
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("firstName", form.firstName);
-    formData.append("lastName", form.lastName);
-    formData.append("email", form.email);
-    formData.append("mobile", form.mobile);
-    formData.append("role", form.role);
-
-    // 🟢 ADD USER ID HERE
-    formData.append("userId", selectedUser._id);
-
+    
+    if (!selectedUser) {
+      Swal.fire("Error", "No user selected", "error");
+      return;
+    }
+    
+    setLoadingEdit(true);
 
     try {
-      const res = await axiosInstance.put("/auth/update-profile", formData);
-      console.log(res)
+      // FIX: Your API endpoint is /api/auth/:id for PUT, not /api/auth/update-profile
+      const res = await axiosInstance.put(`/auth/${selectedUser._id}`, {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        mobile: form.mobile,
+        role: form.role,
+      });
 
-      if (res.data?.success || res.data?.data?.success) {
-        Swal.fire("Updated!", res.data?.message || "User updated successfully", "success");
+      console.log("Update response:", res);
+
+      if (res.data?.success) {
+        Swal.fire("Updated!", "User updated successfully", "success");
         fetchUsers();
       }
     } catch (err) {
       Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
     } finally {
-      setLoadingEdit(false)
-
+      setLoadingEdit(false);
     }
   };
 
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
       {/* USERS LIST */}
       <div className="lg:col-span-2 rounded-2xl bg-slate-950/60 border border-slate-800 p-4">
-
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg font-semibold text-slate-50">Users</h1>
           <span className="text-xs text-slate-400">Total: {users.length}</span>
@@ -105,156 +107,146 @@ export default function Users() {
                 <th className="px-3 py-2 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            {
-              loading ? <div className="absolute inset-0 flex items-center justify-center">
-                <Loader size={40} color="#6366f1" />
-              </div> :
-                <tbody className="divide-y divide-slate-800">
-                  {users.map((u) => (
-                    <tr key={u._id} className="hover:bg-slate-900/70">
+            <tbody className="divide-y divide-slate-800">
+              {loading ? (
+                // FIX: Move the loader to a table row instead of a div
+                <tr>
+                  <td colSpan="6" className="px-3 py-8 text-center">
+                    <div className="flex justify-center">
+                      <Loader size={40} color="#6366f1" />
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                users.map((u) => (
+                  <tr key={u._id} className="hover:bg-slate-900/70">
+                    {/* PROFILE IMAGE */}
+                    <td className="px-3 py-2">
+                      <div className="toUppercase w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
+                        {/* FIX: Handle empty names */}
+                        {u.firstName ? u.firstName[0] : ""}
+                        {u.lastName ? u.lastName[0] : ""}
+                      </div>
+                    </td>
 
-                      {/* PROFILE IMAGE */}
-                      <td className="px-3 py-2">
-                        {/* {u.profileImage ? (
-                      <img
-                        src={u.profileImage}
-                        alt="profile"
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : ( */}
-                        <div className="toUppercase w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
-                          {u.firstName[0]} {u.lastName[0]}
-                        </div>
-                        {/* )} */}
-                      </td>
+                    {/* FULL NAME */}
+                    <td className="px-3 py-2 text-slate-100">
+                      {u.firstName || ""} {u.lastName || ""}
+                    </td>
 
-                      {/* FULL NAME */}
-                      <td className="px-3 py-2 text-slate-100">
-                        {u.firstName} {u.lastName}
-                      </td>
+                    <td className="px-3 py-2 text-slate-200">{u.mobile}</td>
+                    <td className="px-3 py-2 text-slate-300">{u.email || "-"}</td>
 
-                      <td className="px-3 py-2 text-slate-200">{u.mobile}</td>
-                      <td className="px-3 py-2 text-slate-300">{u.email}</td>
+                    {/* ROLE */}
+                    <td className="px-3 py-2 capitalize">
+                      <span className="px-2 py-1 rounded-full bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">
+                        {u.role}
+                      </span>
+                    </td>
 
-                      {/* ROLE */}
-                      <td className="px-3 py-2 capitalize">
-                        <span className="px-2 py-1 rounded-full bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">
-                          {u.role}
-                        </span>
-                      </td>
+                    {/* EDIT BUTTON */}
+                    <td className="px-3 py-2 text-right">
+                      <button
+                        onClick={() => handleEdit(u)}
+                        className="text-indigo-300 text-[11px] hover:text-indigo-200"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
 
-                      {/* EDIT BUTTON */}
-                      <td className="px-3 py-2 text-right">
-                        <button
-                          onClick={() => handleEdit(u)}
-                          className="text-indigo-300 text-[11px] hover:text-indigo-200"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {users.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="px-3 py-6 text-center text-slate-500">
-                        No users found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-            }
+              {!loading && users.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="px-3 py-6 text-center text-slate-500">
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
           </table>
         </div>
-
       </div>
 
       {/* USER FORM */}
       <div className="rounded-2xl bg-slate-950/60 border border-slate-800 p-4">
-
         <h2 className="text-sm font-semibold text-slate-100 mb-1">
-          {/* {selectedUser ? "Edit User" : "Create User"} */}
-          Update User
+          Update User {selectedUser ? `- ${selectedUser.firstName || ""}` : ""}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-
-          <div>
-            <label className="block mb-1 text-slate-300">First Name</label>
-            <input
-              type="text"
-              className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
-              value={form.firstName}
-              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-              required
-            />
+        {!selectedUser ? (
+          <div className="text-center py-8 text-slate-400 text-xs">
+            Select a user to edit
           </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+            <div>
+              <label className="block mb-1 text-slate-300">First Name</label>
+              <input
+                type="text"
+                className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
+                value={form.firstName}
+                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block mb-1 text-slate-300">Last Name</label>
-            <input
-              type="text"
-              className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
-              value={form.lastName}
-              onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-              required
-            />
-          </div>
+            <div>
+              <label className="block mb-1 text-slate-300">Last Name</label>
+              <input
+                type="text"
+                className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block mb-1 text-slate-300">Mobile</label>
-            <input
-              type="tel"
-              className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
-              value={form.mobile}
-              onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-              required
-            />
-          </div>
+            <div>
+              <label className="block mb-1 text-slate-300">Mobile</label>
+              <input
+                type="tel"
+                className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
+                value={form.mobile}
+                onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block mb-1 text-slate-300">Email</label>
-            <input
-              type="email"
-              className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
-          </div>
+            <div>
+              <label className="block mb-1 text-slate-300">Email</label>
+              <input
+                type="email"
+                className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+            </div>
 
-          {/* ROLE */}
-          <div>
-            <label className="block mb-1 text-slate-300">Role</label>
-            <select
-              className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            {/* ROLE */}
+            <div>
+              <label className="block mb-1 text-slate-300">Role</label>
+              <select
+                className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2"
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loadingEdit}
+              className="w-full mt-2 px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50"
             >
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-            </select>
-          </div>
-
-          {/* PROFILE IMAGE PREVIEW */}
-          {/* {form.profileImage && (
-            <img
-              src={form.profileImage}
-              alt="preview"
-              className="w-16 h-16 rounded-md object-cover mt-2"
-            />
-          )} */}
-
-          <button
-            type="submit"
-            disabled={loadingEdit}
-            className="w-full mt-2 px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500"
-          >
-            {loadingEdit ? "Updating..." :
-              "Update User"}
-          </button>
-
-        </form>
+              {loadingEdit ? "Updating..." : "Update User"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
